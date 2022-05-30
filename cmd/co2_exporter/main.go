@@ -5,6 +5,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type XMLData struct {
@@ -34,7 +39,7 @@ type XMLData struct {
 	} `xml:"mixtr"`
 }
 
-func get_co2_emission(XML_URL string) string {
+func get_co2_emission(XML_URL string) uint8 {
 	resp, err := http.Get(XML_URL)
 
 	if err != nil {
@@ -61,15 +66,40 @@ func get_co2_emission(XML_URL string) string {
 	}
 
 	co2_values := data.Mixtr.Type.Valeur
-	last_co2 := co2_values[len(co2_values) - 1].Text
+	last_co2 := co2_values[len(co2_values)-1].Text
 
-	return last_co2
+	co2_emission, err := strconv.ParseUint(last_co2, 10, 64)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return uint8(co2_emission)
 }
 
+func recordMetrics() {
+	go func() {
+		for {
+			co2_emission := get_co2_emission(XML_URL)
+			log.Println(float64(co2_emission))
+			co2EmissionGauge.Set(float64(co2_emission))
+			time.Sleep(15 * time.Minute)
+		}
+	}()
+}
+
+var (
+	XML_URL          = "https://www.rte-france.com/themes/swi/xml/power-co2-emission-fr.xml"
+	co2EmissionGauge = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "co2_emission",
+		Help: "CO2 emission of the France's electricity consumption",
+	})
+)
+
 func main() {
+	prometheus.MustRegister(co2EmissionGauge)
+	recordMetrics()
 
-	XML_URL := "https://www.rte-france.com/themes/swi/xml/power-co2-emission-fr.xml"
-	co2_emission := get_co2_emission(XML_URL)
-
-	log.Println(co2_emission)
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(":2112", nil)
 }
