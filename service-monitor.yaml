@@ -16,4 +16,4 @@ spec:
       component: co2-exporter
   endpoints:
   - port: co2-metrics
-    interval: 15s
+    interval: 900s
