@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: co2-exporter
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: co2-exporter
+  template:
+    metadata:
+      labels:
+        app: co2-exporter
+        component: co2-exporter
+    spec:
+      containers:
+      - name: co2-exporter
+        image: co2-exporter:0.0.1
+        ports:
+        - containerPort: 2112
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: co2-exporter-svc
+  namespace: default
+  labels:
+    app: co2-exporter
+    component: co2-exporter
+spec:
+  selector:
+    app: co2-exporter
+    component: co2-exporter
+  ports:
+    - name: co2-metrics
+      port: 2112
+      targetPort: 2112
+      protocol: TCP

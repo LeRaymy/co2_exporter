@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: co2-exporter-servicemonitor
+  namespace: monitoring-system
+  labels:
+    name: co2-exporter-servicemonitor
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: co2-exporter
+      component: co2-exporter
+  endpoints:
+  - port: co2-metrics
+    interval: 15s
