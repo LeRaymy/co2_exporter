@@ -81,7 +81,6 @@ func recordMetrics() {
 	go func() {
 		for {
 			co2_emission := get_co2_emission(XML_URL)
-			log.Println(float64(co2_emission))
 			co2EmissionGauge.Set(float64(co2_emission))
 			time.Sleep(15 * time.Minute)
 		}
