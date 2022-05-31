@@ -22,6 +22,12 @@ Configuration dans `rules.yaml`.
 helm upgrade --install prometheus-adapter prometheus-community/prometheus-adapter -n monitoring-system -f rules.yml
 ```
 
+# horizontal pod autoscaler
+Configuration dans `hpa.yaml`
+```
+kubectl apply -f hpa.yaml
+```
+
 # Liens utiles
 
 - [RTE eco2mix](https://www.rte-france.com/eco2mix)
