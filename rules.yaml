@@ -1,0 +1,9 @@
+prometheus:
+  url: http://prometheus-kube-prometheus-prometheus.monitoring-system.svc.cluster.local
+  port: 9090
+rules:
+  external: 
+    - seriesQuery: 'co2_emission'
+      metricsQuery: 1 / co2_emission 
+      resources:
+        namespaced: false
